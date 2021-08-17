@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>SwaggerClient test</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+<div id="app">
+<v-app>
+<!-- <v-navigation-drawer app>
+</v-navigation-drawer> -->
+
+<v-app-bar app>
+    <!-- Плашка наверху -->
+    <v-progress-circular
+        v-if="loading"
+        color="purple"
+        indeterminate>
+    </v-progress-circular>
+    <v-row v-if="!loading">
+        <v-col v-if="redirectUrl">
+            <a :href="redirectUrl">
+                <img src="https://web.ccpgamescdn.com/eveonlineassets/developers/eve-sso-login-white-large.png">
+
+                </img>
+            </a>
+        </v-col>
+        <!-- TODO: User face :) -->
+        <v-spacer></v-spacer>
+        <v-col>
+            <v-btn @click="logout"
+                   v-if="!redirectUrl">
+                Log out
+            </v-btn>
+        </v-col>
+    </v-row>
+</v-app-bar>
+<v-main>
+    <v-container fluid>
+        <!-- 🕹️ Фильтры -->
+        <v-row>
+            <v-col>
+                <v-btn @click="test" color="orange"
+                       v-if="this.SwaggerClient && !loading">
+                    test
+                </v-btn>
+                <v-progress-circular
+                    v-if="!this.SwaggerClient || loading"
+                    color="orange"
+                    indeterminate>
+                </v-progress-circular>
+            </v-col>
+        </v-row>
+        <v-row>
+            <v-col>
+                <v-text-field v-model="settings.minPrice"
+                    label="Тестовое текстовое поле, пока ни к чему не привязано"
+                    type="number">
+                </v-text-field>
+            </v-col>
+        </v-row>
+        <!-- 📜 Таблица -->
+        <v-row>
+            <v-data-table
+                    v-if="table.items.length"
+                    :options="table.options"
+                    :headers="table.headers"
+                    :items="table.items"
+                    :expanded="table.items"
+                    v-model="table.selected"
+                    :items-per-page="15"
+                    elevation="1"
+                    item-key="name"
+                    show-select
+                    show-expand
+                    dense>
+                <!-- Настройки колонок в хедерах -->
+                <!-- <template v-slot:header.sell_price>
+                    <v-icon>mdi-cart-arrow-up</v-icon>
+                </template>
+                <template v-slot:header.buy_price>
+                    <v-icon>mdi-cart-arrow-down</v-icon>
+                </template>
+                <template v-slot:header.volume_average>
+                    <v-icon>mdi-repeat</v-icon>
+                </template>
+                <template v-slot:header.competition>
+                    <v-icon>mdi-account-group</v-icon>
+                </template> -->
+                <!-- <template v-slot:header.sell_average_24h>
+                    <v-icon>mdi-delta</v-icon>
+                </template>
+                <template v-slot:header.buy_average_24h>
+                    <v-icon>mdi-delta</v-icon>
+                </template> -->
+
+                <!-- Настройки колонок в теле таблицы -->
+
+                <template v-slot:item.image="{ item }">
+                    <v-img :src="`https://images.evetech.net/types/${item.type_id}/icon`"></v-img>
+                </template>
+
+                <template v-slot:item.type_id="{ item }">
+                    <v-btn @click="debugItemInfo(item)" small>
+                        <v-icon >
+                            mdi-information-outline
+                        </v-icon>
+                    </v-btn>
+                </template>
+            </v-data-table>
+        </v-row>
+        <!-- 📈 PROGRESS BAR -->
+        <v-row v-if="loading">
+            <v-progress-linear v-if="!indeterminate"
+                v-model="loadingProgress"
+                :color="loadingColor">
+            </v-progress-linear>
+            <v-progress-linear v-if="indeterminate"
+                indeterminate
+                :color="loadingColor">
+            </v-progress-linear>
+        </v-row>
+        <!-- 🚧 NOTIFICATIONS -->
+        <v-row>
+            <v-spacer></v-spacer>
+            <v-col>
+                <v-alert v-if="error"
+                    v-model="error"
+                    close-text="Close Alert"
+                    color="red"
+                    dismissible>
+                    {{ errorMessage }}
+                </v-alert>
+                <v-alert v-if="info"
+                    v-model="info"
+                    close-text="Close"
+                    color="blue">
+                    {{ infoMessage }}
+                </v-alert>
+            </v-col>
+            <v-spacer></v-spacer>
+        </v-row>
+    </v-container>
+</v-main>
+<v-footer app>
+    <!-- -->
+</v-footer>
+</v-app>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+<script src="https://unpkg.com/swagger-client"></script>
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+<script src="https://unpkg.com/idb/build/iife/index-min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js" integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- <script src="./src/index.js"></script> -->
+<style>
+    .stackSheet {
+        position: relative;
+    }
+    .stackSpark {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+</style>
+</body>
+</html>
