@@ -2,9 +2,11 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
 
+const SingleSignOn = require('eve-sso').default;
+
+// Load enviromental variables from .env file
 require('dotenv').config();
 
-const SingleSignOn = require('eve-sso').default;
 
 // The callback URI as defined in the application in the developers section
 const CALLBACK_URI = `http://localhost:${process.env.PORT}/`;
