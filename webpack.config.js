@@ -2,18 +2,14 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
 
+require('dotenv').config();
 
 const SingleSignOn = require('eve-sso').default;
 
-
-const PORT = 8181;
-// Get the client ID and secret from the Eve developers section
-const CLIENT_ID = '';
-const SECRET = ''
 // The callback URI as defined in the application in the developers section
-const CALLBACK_URI = `http://localhost:${PORT}/`;
+const CALLBACK_URI = `http://localhost:${process.env.PORT}/`;
 
-const sso = new SingleSignOn(CLIENT_ID, SECRET, CALLBACK_URI, {
+const sso = new SingleSignOn(process.env.CLIENT_ID, process.env.CLIENT_SECRET, CALLBACK_URI, {
   endpoint: 'https://login.eveonline.com', // optional, defaults to this
 //   userAgent: 'my-user-agent' // optional
 })
@@ -25,7 +21,7 @@ module.exports = {
     },
     devtool: 'inline-source-map',
     devServer: {
-        port: PORT,
+        port: process.env.PORT,
         contentBase: './dist',
         open: false,
         before: function(app) {
